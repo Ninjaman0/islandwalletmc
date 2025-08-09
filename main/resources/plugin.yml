@@ -1,0 +1,82 @@
+name: IslandWallet
+version: 1.5.0
+main: com.ninja.islandwallet.IslandWalletPlugin
+api-version: '1.21'
+author: Ninja0_0
+description: Shared island gems wallet system with biweekly payout leaderboard for SuperiorSkyblock
+
+softdepend:
+  - PlaceholderAPI
+  - SuperiorSkyblock2
+  - PlayerPoints
+  - Vault
+  - EssentialsX
+
+commands:
+  wallet:
+    description: Main wallet command
+    usage: /wallet [balance|purchase|admin|help]
+    aliases: [islandwallet, iw]
+  payout:
+    description: View the payout leaderboard
+    usage: /payout
+
+permissions:
+  islandwallet.*:
+    description: All Island Wallet permissions
+    children:
+      islandwallet.balance: true
+      islandwallet.leaderboard: true
+      islandwallet.purchase: true
+      islandwallet.admin.*: true
+
+  islandwallet.balance:
+    description: View island wallet balance
+    default: op
+
+  islandwallet.leaderboard:
+    description: View leaderboard GUI
+    default: true
+
+  islandwallet.purchase:
+    description: Purchase payout points
+    default: true
+
+  islandwallet.admin.*:
+    description: All admin permissions
+    children:
+      islandwallet.admin.reset: true
+      islandwallet.admin.view: true
+      islandwallet.admin.history: true
+      islandwallet.admin.reload: true
+      islandwallet.admin.deposit: true
+      islandwallet.admin.withdraw: true
+      islandwallet.admin.force: true
+
+  islandwallet.admin.reset:
+    description: Force reset payout cycle
+    default: op
+
+  islandwallet.admin.view:
+    description: View any island wallet data
+    default: op
+
+  islandwallet.admin.history:
+    description: View historical payout data
+    default: op
+
+  islandwallet.admin.reload:
+    description: Reload plugin configuration
+    default: op
+
+  islandwallet.admin.deposit:
+    description: Admin deposit gems to player
+    default: op
+
+  islandwallet.admin.withdraw:
+    description: Admin withdraw gems from player
+    default: op
+
+  islandwallet.admin.force:
+    description: Force complete or shutdown payout events
+    default: op

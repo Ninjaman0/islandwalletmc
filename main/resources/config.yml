@@ -1,0 +1,332 @@
+# IslandWallet Plugin Configuration
+# Compatible with Minecraft 1.21.4 and Paper
+# CRITICAL: Gems are completely separate from payout money system
+
+# Storage configuration
+storage:
+  # Storage type: yaml or sqlite
+  type: sqlite
+  # Database file name (for SQLite)
+  database-file: islandwallet.db
+
+# Payout system configuration
+payout:
+  # Payout interval in seconds (default: 1,209,600 = 14 days)
+  interval: 1209600
+  # Auto-start new cycle after payout (true/false)
+  auto-start-new-cycle: true
+  # Point purchase cost in MONEY (dollars) per point
+  point-cost-money: 1000.0
+  # Track when the last payout occurred (automatically managed)
+  last-payout-time: 0
+
+# Economy configuration
+economy:
+  # Support both Vault and EssentialsX money
+  use-vault: true
+  use-essentialsx: true
+  # Gems to currency ratio (for display only, not for payouts)
+  gem-to-currency-ratio: 1.0
+
+# GUI configuration
+gui:
+  # Leaderboard settings
+  leaderboard:
+    exit-button:
+      enabled: true
+      slot: 49
+      material: BARRIER
+      name: "&c&lExit Leaderboard"
+      lore:
+        - "&7Click to close this menu"
+    # Number of ranks to display
+    display-ranks: 10
+    # GUI title
+    title: "&6&lPayout Leaderboard"
+    # GUI size (must be multiple of 9, max 54)
+    size: 54
+
+  # ENHANCED: Configurable winners podium settings
+  podium:
+    title: "&6&lSeason {season} Winners"
+    size: 54
+    first-place-slot: 13
+    second-place-slot: 12
+    third-place-slot: 14
+    previous-season-slot: 45
+    new-cycle-slot: 53
+    # Podium access button slot (in leaderboard GUI)
+    access-slot: 45
+    exit-button:
+      enabled: true
+      slot: 49
+      material: BARRIER
+      name: "&c&lExit Leaderboard"
+      lore:
+        - "&7Click to close this menu"
+
+  # Point purchase GUI settings
+  purchase:
+    title: "&a&lPurchase Payout Points"
+    size: 27
+    # Purchase option slots
+    buy-1-slot: 11
+    buy-10-slot: 13
+    buy-100-slot: 15
+    # Access slot in main GUI (right corner)
+    access-slot: 53
+    exit-button:
+      enabled: true
+      slot: 49
+      material: BARRIER
+      name: "&c&lExit Leaderboard"
+      lore:
+        - "&7Click to close this menu"
+
+
+  # ENHANCED: Configurable filler settings for all GUIs
+  filler:
+    # Enable filler items (true/false)
+    enabled: true
+    # Material for filler items
+    material: GRAY_STAINED_GLASS_PANE
+    # Display name for filler items
+    name: " "
+    # Lore for filler items (can be empty)
+    lore: []
+    # Specific slots to fill (empty = fill all empty slots)
+    # Format: [slot1, slot2, slot3] or [] for all empty slots
+    specific-slots: []
+    # Skip these slots when filling (useful for navigation areas)
+    skip-slots: []
+
+# Item configurations
+items:
+  # Leaderboard items
+  leaderboard-entry:
+    material: PLAYER_HEAD
+    name: "&6#{rank} &e{island_name}"
+    lore:
+      - "&7Leader: &f{leader}"
+      - "&7Members: &f{member_count}"
+      - "&7Payout Points: &b{payout_points_formatted}"
+      - "&7Currency Value: &2${currency_formatted}"
+      - ""
+      - "&8Rank #{rank}"
+
+  # Purchase GUI items (now using money)
+  purchase-1-point:
+    material: EMERALD
+    name: "&a&lBuy 1 Point"
+    lore:
+      - "&7Cost: &2${cost}"
+      - "&7Click to purchase 1 payout point"
+      - ""
+      - "&aYour Balance: &2${player_balance}"
+      - "&7Can Afford: {can_afford}"
+
+  purchase-10-points:
+    material: EMERALD_BLOCK
+    name: "&a&lBuy 10 Points"
+    lore:
+      - "&7Cost: &2${cost}"
+      - "&7Click to purchase 10 payout points"
+      - ""
+      - "&aYour Balance: &2${player_balance}"
+      - "&7Can Afford: {can_afford}"
+
+  purchase-100-points:
+    material: BEACON
+    name: "&a&lBuy 100 Points"
+    lore:
+      - "&7Cost: &2${cost}"
+      - "&7Click to purchase 100 payout points"
+      - ""
+      - "&aYour Balance: &2${player_balance}"
+      - "&7Can Afford: {can_afford}"
+
+  # Access button for purchase GUI
+  purchase-access:
+    material: GOLD_INGOT
+    name: "&e&lPurchase Points"
+    lore:
+      - "&7Click to open point"
+      - "&7purchase menu"
+      - ""
+      - "&6Cost: &2${point_cost_money} per point"
+
+  # Podium access button (NEW)
+  podium-access:
+    material: NETHER_STAR
+    name: "&6&lWinners Podium"
+    lore:
+      - "&7Click to view the"
+      - "&7last season winners"
+      - ""
+      - "&eTop 3 Islands Display"
+
+  # Podium items (no money amounts since no distribution)
+  podium-first:
+    material: GOLD_BLOCK
+    name: "&6&l🥇 FIRST PLACE"
+    lore:
+      - "&e{island_name}"
+      - "&7Leader: &f{leader}"
+      - "&7Payout Points: &b{payout_points_formatted}"
+      - "&7Currency Value: &2${currency_formatted}"
+      - ""
+      - "&6&lSeason Champion!"
+
+  podium-second:
+    material: IRON_BLOCK
+    name: "&7&l🥈 SECOND PLACE"
+    lore:
+      - "&e{island_name}"
+      - "&7Leader: &f{leader}"
+      - "&7Payout Points: &b{payout_points_formatted}"
+      - "&7Currency Value: &2${currency_formatted}"
+      - ""
+      - "&7&lGreat effort!"
+
+  podium-third:
+    material: COPPER_BLOCK
+    name: "&c&l🥉 THIRD PLACE"
+    lore:
+      - "&e{island_name}"
+      - "&7Leader: &f{leader}"
+      - "&7Payout Points: &b{payout_points_formatted}"
+      - "&7Currency Value: &2${currency_formatted}"
+      - ""
+      - "&c&lWell done!"
+
+  # Navigation items
+  previous-season:
+    material: ARROW
+    name: "&e&lPrevious Season"
+    lore:
+      - "&7Click to view last"
+      - "&7season's winners"
+
+  new-cycle:
+    material: EMERALD
+    name: "&a&lStart New Cycle"
+    lore:
+      - "&7Click to start a new"
+      - "&7payout cycle"
+      - ""
+      - "&c&lAdmin Only!"
+
+  # ENHANCED: Configurable filler items (now references gui.filler settings)
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    name: " "
+    lore: []
+
+# Messages configuration with proper placeholders and full color support
+messages:
+  # General messages with full color code support
+  prefix: "&8[&6&lIslandWallet&8] &f"
+  no-permission: "&cYou don't have permission to use this command!"
+  player-only: "&cThis command can only be used by players!"
+  invalid-command: "&cInvalid command usage! Use &e/wallet help &cfor help"
+  command-cooldown: "&cPlease wait &e{seconds} &cseconds before using this command again!"
+
+  # Island-related messages with full color support
+  no-island: "&cYou must be on an island to use this feature!"
+  not-island-member: "&cYou are not a member of this island!"
+  not-island-leader: "&cOnly island leaders can access this feature!"
+
+  # Wallet messages with proper placeholder formatting
+  balance-display: "&a&lIsland Wallet Balance:"
+  balance-gems: "&7Gems: &e{gems_formatted}"
+  balance-payout-points: "&7Payout Points: &b{payout_points_formatted}"
+
+  gems-deposited: "&aDeposited &e{gems} &agems to island wallet!"
+  gems-withdrawn: "&aWithdrew &e{gems} &agems from island wallet!"
+  gems-transferred: "&7Your earned gems have been transferred to your island wallet."
+
+  # Purchase messages (now using money) with full color support
+  purchase-success: "&aSuccessfully purchased &b{points} &apayout points for &2${cost}!"
+  purchase-insufficient-money: "&cYou don't have enough money! Required: &2${required} &cYou have: &2${current}"
+  purchase-gui-opened: "&aOpened point purchase menu."
+
+  # Leaderboard messages with full color support
+  leaderboard-opening: "&aOpening payout leaderboard..."
+  no-leaderboard-data: "&cNo leaderboard data available yet!"
+
+  # Payout messages (no money distribution) with enhanced colors
+  payout-cycle-ended: "&6&lPayout cycle has ended! &eWinners announced!"
+  payout-cycle-started: "&a&lNew payout cycle has started! &2Earn points to compete!"
+  payout-force-complete: "&6&lPayout cycle forcefully completed by admin!"
+  payout-force-shutdown: "&c&lPayout cycle forcefully shutdown by admin!"
+
+  # ENHANCED: Time remaining messages
+  time-remaining-display: "&7Next payout in: &e{time_remaining_formatted}"
+  time-remaining-hours: "&7Next payout in: &e{hours} hours"
+  time-remaining-minutes: "&7Next payout in: &e{minutes} minutes"
+
+  # Admin messages with enhanced color coding
+  admin-reset-success: "&aSuccessfully reset payout cycle!"
+  admin-reload-success: "&aConfiguration reloaded successfully!"
+  admin-view-island: "&aViewing island data for: &e{island}"
+  admin-deposit-success: "&aDeposited &e{amount} &agems to &f{player}&a's island wallet!"
+  admin-withdraw-success: "&aWithdrew &e{amount} &agems from &f{player}&a's island wallet!"
+  admin-balance-check: "&f{player}&a's island has &e{gems_formatted} &agems."
+  island-not-found: "&cIsland not found: &e{island}"
+  player-not-found: "&cPlayer not found: &e{player}"
+
+  # Error messages with enhanced color support
+  plugin-disabled: "&c&lIslandWallet plugin is currently disabled!"
+  database-error: "&c&lDatabase error occurred! &7Please contact an administrator."
+  api-error: "&c&lError connecting to required plugins. &7Please try again later."
+  insufficient-gems: "&cInsufficient gems for this operation!"
+  economy-error: "&c&lEconomy system error! &7Cannot process money transactions."
+
+  # Progress and status messages
+  loading-data: "&eLoading island data..."
+  saving-data: "&eSaving changes..."
+  operation-complete: "&aOperation completed successfully!"
+  operation-failed: "&cOperation failed! Please try again."
+
+# Cooldown settings (in seconds)
+cooldowns:
+  leaderboard-command: 0.5
+  balance-command: 0.5
+  purchase-command: 0.5
+  gui-interaction: 0.5
+
+# Debug settings
+debug:
+  # Enable debug logging
+  enabled: false
+  # Log wallet transactions
+  log-transactions: false
+  # Log GUI interactions
+  log-gui-interactions: false
+  # Log money transactions
+  log-money-transactions: false
+  # Color debug messages
+  colored-debug: false
+
+# PlaceholderAPI integration
+placeholders:
+  # Enable comprehensive placeholder support
+  enabled: true
+  # Register all island wallet placeholders
+  register-all: true
+  # Custom placeholder prefix
+  prefix: "islandwallet"
+
+# Display formatting
+formatting:
+  # Number formatting with commas
+  use-commas: true
+  # Currency symbol
+  currency-symbol: "$"
+  # Compact number format for large values
+  compact-numbers: false
+  # Progress bar settings
+  progress-bar:
+    length: 20
+    filled-char: "█"
+    empty-char: "░"
