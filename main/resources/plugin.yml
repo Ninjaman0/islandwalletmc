@@ -42,6 +42,14 @@ permissions:
     description: Purchase payout points
     default: true
 
+  islandwallet.info:
+    description: View plugin information
+    default: true
+
+  islandwallet.time:
+    description: View payout countdown
+    default: true
+
   islandwallet.admin.*:
     description: All admin permissions
     children:
@@ -52,6 +60,11 @@ permissions:
       islandwallet.admin.deposit: true
       islandwallet.admin.withdraw: true
       islandwallet.admin.force: true
+      islandwallet.admin.stats: true
+      islandwallet.admin.backup: true
+      islandwallet.admin.migrate: true
+      islandwallet.admin.cleanup: true
+      islandwallet.admin.test: true
 
   islandwallet.admin.reset:
     description: Force reset payout cycle
@@ -79,4 +92,24 @@ permissions:
 
   islandwallet.admin.force:
     description: Force complete or shutdown payout events
+    default: op
+
+  islandwallet.admin.stats:
+    description: View server statistics
+    default: op
+
+  islandwallet.admin.backup:
+    description: Create data backups
+    default: op
+
+  islandwallet.admin.migrate:
+    description: Migrate storage types
+    default: op
+
+  islandwallet.admin.cleanup:
+    description: Clean invalid data
+    default: op
+
+  islandwallet.admin.test:
+    description: Test system components
     default: op

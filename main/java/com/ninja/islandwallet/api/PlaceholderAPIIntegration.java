@@ -74,6 +74,20 @@ public class PlaceholderAPIIntegration extends PlaceholderExpansion {
                 case "time_remaining_minutes" -> MessageUtil.formatTimeRemainingMinutes(plugin.getPayoutManager().getTimeUntilNextPayout());
                 case "time_remaining_formatted" -> MessageUtil.formatTimeRemaining(plugin.getPayoutManager().getTimeUntilNextPayout());
                 case "time_remaining_seconds" -> String.valueOf(plugin.getPayoutManager().getTimeUntilNextPayout());
+                // ENHANCED: Multiple countdown format placeholders
+                case "time_remaining_compact" -> MessageUtil.formatTimeRemainingCompact(plugin.getPayoutManager().getTimeUntilNextPayout());
+                case "time_remaining_short" -> MessageUtil.formatTimeRemainingShort(plugin.getPayoutManager().getTimeUntilNextPayout());
+                case "time_remaining_days" -> String.valueOf(plugin.getPayoutManager().getTimeUntilNextPayout() / 86400);
+                case "time_remaining_hours_only" -> String.valueOf((plugin.getPayoutManager().getTimeUntilNextPayout() % 86400) / 3600);
+                case "time_remaining_minutes_only" -> String.valueOf((plugin.getPayoutManager().getTimeUntilNextPayout() % 3600) / 60);
+                case "time_remaining_dhm" -> MessageUtil.formatTimeRemainingDHM(plugin.getPayoutManager().getTimeUntilNextPayout());
+                // ENHANCED: Multiple countdown format placeholders
+                case "time_remaining_compact" -> MessageUtil.formatTimeRemainingCompact(plugin.getPayoutManager().getTimeUntilNextPayout());
+                case "time_remaining_short" -> MessageUtil.formatTimeRemainingShort(plugin.getPayoutManager().getTimeUntilNextPayout());
+                case "time_remaining_days" -> String.valueOf(plugin.getPayoutManager().getTimeUntilNextPayout() / 86400);
+                case "time_remaining_hours_only" -> String.valueOf((plugin.getPayoutManager().getTimeUntilNextPayout() % 86400) / 3600);
+                case "time_remaining_minutes_only" -> String.valueOf((plugin.getPayoutManager().getTimeUntilNextPayout() % 3600) / 60);
+                case "time_remaining_dhm" -> MessageUtil.formatTimeRemainingDHM(plugin.getPayoutManager().getTimeUntilNextPayout());
                 // Legacy compatibility
                 case "playerpoints" -> "0";
                 default -> "";

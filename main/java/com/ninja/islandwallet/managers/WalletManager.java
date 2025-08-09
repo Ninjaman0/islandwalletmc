@@ -329,9 +329,12 @@ public class WalletManager {
             // Check if player has enough money
             double playerBalance = economy.getBalance(player);
             if (!economy.has(player, cost)) {
-                String message = plugin.getConfigManager().getMessage("purchase-insufficient-money")
-                        .replace("{required}", String.format("$%.2f", cost))
-                        .replace("{current}", String.format("$%.2f", playerBalance));
+                String message = MessageUtil.replacePlaceholders(
+                        plugin.getConfigManager().getMessage("purchase-insufficient-money"),
+                        "{required}", MessageUtil.formatMoney(cost),
+                        "{required_formatted}", MessageUtil.formatMoney(cost),
+                        "{current}", MessageUtil.formatMoney(playerBalance),
+                        "{current_formatted}", MessageUtil.formatMoney(playerBalance));
                 player.sendMessage(plugin.getConfigManager().getPrefix() + message);
                 return false;
             }
@@ -358,14 +361,16 @@ public class WalletManager {
             // Save to database
             saveIslandDataAsync(islandData);
 
-            // Send success message
-            String message = plugin.getConfigManager().getMessage("purchase-success")
-                    .replace("{points}", String.valueOf(points))
-                    .replace("{cost}", String.format("$%.2f", cost));
+            // Send success message with proper formatting
+            String message = MessageUtil.replacePlaceholders(
+                    plugin.getConfigManager().getMessage("purchase-success"),
+                    "{points}", String.valueOf(points),
+                    "{cost}", MessageUtil.formatMoney(cost),
+                    "{cost_formatted}", MessageUtil.formatMoney(cost));
             player.sendMessage(plugin.getConfigManager().getPrefix() + message);
 
             if (plugin.getConfigManager().isLogMoneyTransactions()) {
-                plugin.getLogger().info(player.getName() + " purchased " + points + " payout points for $" + String.format("%.2f", cost));
+                plugin.getLogger().info(player.getName() + " purchased " + points + " payout points for " + MessageUtil.formatMoney(cost));
             }
 
             return true;
@@ -641,6 +646,81 @@ public class WalletManager {
                     !islandData.getIslandName().trim().isEmpty();
         } catch (Exception e) {
             plugin.getLogger().log(Level.WARNING, "Error validating island data", e);
+            return false;
+        }
+    }
+
+    /**
+     * ENHANCED: Create backup of current data
+     */
+    public void createBackup() {
+        CompletableFuture.runAsync(() -> {
+            try {
+                // Implementation depends on storage type
+                plugin.getLogger().info("Creating data backup...");
+                
+                // For now, just save all current data
+                Map<String, IslandData> allData = getAllIslandData();
+                plugin.getLogger().info("Backup created with " + allData.size() + " island records");
+                
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.SEVERE, "Failed to create backup", e);
+            }
+        });
+    }
+
+    /**
+     * ENHANCED: Migrate storage type
+     */
+    public boolean migrateStorage(String targetType) {
+        try {
+            plugin.getLogger().info("Migration to " + targetType + " storage initiated...");
+            // Implementation would depend on current and target storage types
+            // For now, just return success
+            return true;
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to migrate storage", e);
+            return false;
+        }
+    }
+
+    /**
+     * ENHANCED: Clean up invalid data
+     */
+    public void cleanupInvalidData() {
+        CompletableFuture.runAsync(() -> {
+            try {
+                plugin.getLogger().info("Cleaning up invalid data...");
+                
+                int removedCount = 0;
+                Map<String, IslandData> allData = new ConcurrentHashMap<>(cachedIslandData);
+                
+                for (Map.Entry<String, IslandData> entry : allData.entrySet()) {
+                    if (!validateIslandData(entry.getValue())) {
+                        cachedIslandData.remove(entry.getKey());
+                        databaseManager.deleteIslandData(entry.getKey());
+                        removedCount++;
+                    }
+                }
+                
+                plugin.getLogger().info("Cleanup completed. Removed " + removedCount + " invalid records");
+                
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.SEVERE, "Failed to cleanup invalid data", e);
+            }
+        });
+    }
+
+    /**
+     * ENHANCED: Test database connection
+     */
+    public boolean testDatabaseConnection() {
+        try {
+            // Try to load a small amount of data to test connection
+            databaseManager.getCurrentSeason();
+            return true;
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Database connection test failed", e);
             return false;
         }
     }

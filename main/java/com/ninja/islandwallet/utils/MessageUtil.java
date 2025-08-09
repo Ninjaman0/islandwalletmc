@@ -135,6 +135,101 @@ public class MessageUtil {
     }
 
     /**
+     * ENHANCED: Format time remaining in compact format (13d 2h 12m)
+     */
+    public static String formatTimeRemainingCompact(long seconds) {
+        if (seconds <= 0) {
+            return "0s";
+        }
+
+        long days = seconds / 86400;
+        long hours = (seconds % 86400) / 3600;
+        long minutes = (seconds % 3600) / 60;
+        long remainingSeconds = seconds % 60;
+
+        StringBuilder result = new StringBuilder();
+
+        if (days > 0) {
+            result.append(days).append("d");
+            if (hours > 0 || minutes > 0) {
+                result.append(" ");
+            }
+        }
+
+        if (hours > 0) {
+            result.append(hours).append("h");
+            if (minutes > 0) {
+                result.append(" ");
+            }
+        }
+
+        if (minutes > 0) {
+            result.append(minutes).append("m");
+        }
+
+        if (result.length() == 0) {
+            result.append(remainingSeconds).append("s");
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * ENHANCED: Format time remaining in short format (13:02:12)
+     */
+    public static String formatTimeRemainingShort(long seconds) {
+        if (seconds <= 0) {
+            return "00:00:00";
+        }
+
+        long days = seconds / 86400;
+        long hours = (seconds % 86400) / 3600;
+        long minutes = (seconds % 3600) / 60;
+        long remainingSeconds = seconds % 60;
+
+        if (days > 0) {
+            return String.format("%dd %02d:%02d:%02d", days, hours, minutes, remainingSeconds);
+        } else {
+            return String.format("%02d:%02d:%02d", hours, minutes, remainingSeconds);
+        }
+    }
+
+    /**
+     * ENHANCED: Format time remaining in DHM format (Days Hours Minutes)
+     */
+    public static String formatTimeRemainingDHM(long seconds) {
+        if (seconds <= 0) {
+            return "0 minutes";
+        }
+
+        long days = seconds / 86400;
+        long hours = (seconds % 86400) / 3600;
+        long minutes = (seconds % 3600) / 60;
+
+        StringBuilder result = new StringBuilder();
+
+        if (days > 0) {
+            result.append(days).append(" day").append(days != 1 ? "s" : "");
+            if (hours > 0 || minutes > 0) {
+                result.append(" ");
+            }
+        }
+
+        if (hours > 0) {
+            result.append(hours).append(" hour").append(hours != 1 ? "s" : "");
+            if (minutes > 0) {
+                result.append(" ");
+            }
+        }
+
+        if (minutes > 0 || result.length() == 0) {
+            result.append(minutes).append(" minute").append(minutes != 1 ? "s" : "");
+        }
+
+        return result.toString();
+    }
+
+    /**
      * ENHANCED: Sanitize strings to prevent injection and ensure safe display
      * Removes potential harmful characters while preserving color codes
      */
@@ -186,6 +281,39 @@ public class MessageUtil {
             return String.format("%.1fB", number / 1000000000.0);
         } else {
             return String.format("%.1fT", number / 1000000000000.0);
+        }
+    }
+
+    /**
+     * ENHANCED: Format money with proper commas and currency symbol
+     */
+    public static String formatMoney(double amount) {
+        if (amount < 0) {
+            return "$0.00";
+        }
+        
+        DecimalFormat moneyFormat = new DecimalFormat("#,##0.00");
+        return "$" + moneyFormat.format(amount);
+    }
+
+    /**
+     * ENHANCED: Format large money amounts with suffixes
+     */
+    public static String formatMoneyCompact(double amount) {
+        if (amount < 0) {
+            return "$0";
+        }
+
+        if (amount < 1000) {
+            return String.format("$%.0f", amount);
+        } else if (amount < 1000000) {
+            return String.format("$%.1fK", amount / 1000.0);
+        } else if (amount < 1000000000) {
+            return String.format("$%.1fM", amount / 1000000.0);
+        } else if (amount < 1000000000000.0) {
+            return String.format("$%.1fB", amount / 1000000000.0);
+        } else {
+            return String.format("$%.1fT", amount / 1000000000000.0);
         }
     }
 

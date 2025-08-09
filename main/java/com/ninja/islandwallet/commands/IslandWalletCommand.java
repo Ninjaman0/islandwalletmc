@@ -50,14 +50,16 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
             case "balance", "bal", "get" -> handleBalanceCommand(sender, args);
             case "purchase", "buy" -> handlePurchaseCommand(sender);
             case "podium", "winners" -> handlePodiumCommand(sender, args);
+            case "info", "status" -> handleInfoCommand(sender);
+            case "time", "countdown" -> handleTimeCommand(sender);
             case "admin" -> handleAdminCommand(sender, args);
             case "help" -> {
                 sendHelpMessage(sender);
                 yield true;
             }
             default -> {
-                sender.sendMessage(plugin.getConfigManager().getPrefix() +
-                        plugin.getConfigManager().getMessage("invalid-command"));
+                String message = plugin.getConfigManager().getMessage("invalid-command");
+                sender.sendMessage(plugin.getConfigManager().getPrefix() + message);
                 yield true;
             }
         };
@@ -129,8 +131,9 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
 
             String message = MessageUtil.replacePlaceholders(
                     plugin.getConfigManager().getMessage("admin-balance-check"),
-                    "{player}", targetPlayer.getName(),
-                    "{gems_formatted}", MessageUtil.formatNumber(targetIslandData.getGems()));
+                    .replace("{points}", String.valueOf(points))
+                    .replace("{cost}", MessageUtil.formatMoney(cost))
+                    .replace("{cost_formatted}", MessageUtil.formatMoney(cost));
             player.sendMessage(plugin.getConfigManager().getPrefix() + message);
 
             return true;
@@ -238,6 +241,44 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
+     * ENHANCED: Handle info command (shows plugin status and statistics)
+     */
+    private boolean handleInfoCommand(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(plugin.getConfigManager().getMessage("player-only"));
+            return true;
+        }
+
+        if (!player.hasPermission("islandwallet.info")) {
+            player.sendMessage(plugin.getConfigManager().getPrefix() +
+                    plugin.getConfigManager().getMessage("no-permission"));
+            return true;
+        }
+
+        sendPluginInfo(player);
+        return true;
+    }
+
+    /**
+     * ENHANCED: Handle time command (shows countdown to next payout)
+     */
+    private boolean handleTimeCommand(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(plugin.getConfigManager().getMessage("player-only"));
+            return true;
+        }
+
+        if (!player.hasPermission("islandwallet.time")) {
+            player.sendMessage(plugin.getConfigManager().getPrefix() +
+                    plugin.getConfigManager().getMessage("no-permission"));
+            return true;
+        }
+
+        sendTimeInfo(player);
+        return true;
+    }
+
+    /**
      * Handle admin commands
      */
     private boolean handleAdminCommand(CommandSender sender, String[] args) {
@@ -262,6 +303,11 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
             case "reload" -> handleAdminReload(sender);
             case "deposit" -> handleAdminDeposit(sender, args);
             case "withdraw" -> handleAdminWithdraw(sender, args);
+            case "stats" -> handleAdminStats(sender);
+            case "backup" -> handleAdminBackup(sender);
+            case "migrate" -> handleAdminMigrate(sender, args);
+            case "cleanup" -> handleAdminCleanup(sender);
+            case "test" -> handleAdminTest(sender, args);
             default -> {
                 sendAdminHelpMessage(sender);
                 yield true;
@@ -304,6 +350,137 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
             }
         }
 
+        return true;
+    }
+
+    /**
+     * ENHANCED: Handle admin stats command
+     */
+    private boolean handleAdminStats(CommandSender sender) {
+        if (!sender.hasPermission("islandwallet.admin.stats")) {
+            sender.sendMessage(plugin.getConfigManager().getPrefix() +
+                    plugin.getConfigManager().getMessage("no-permission"));
+            return true;
+        }
+
+        sendServerStats(sender);
+        return true;
+    }
+
+    /**
+     * ENHANCED: Handle admin backup command
+     */
+    private boolean handleAdminBackup(CommandSender sender) {
+        if (!sender.hasPermission("islandwallet.admin.backup")) {
+            sender.sendMessage(plugin.getConfigManager().getPrefix() +
+                    plugin.getConfigManager().getMessage("no-permission"));
+            return true;
+        }
+
+        // Trigger backup operation
+        plugin.getWalletManager().createBackup();
+        String message = plugin.getConfigManager().getMessage("admin-backup-success");
+        sender.sendMessage(plugin.getConfigManager().getPrefix() + message);
+        return true;
+    }
+
+    /**
+     * ENHANCED: Handle admin migrate command
+     */
+    private boolean handleAdminMigrate(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("islandwallet.admin.migrate")) {
+            sender.sendMessage(plugin.getConfigManager().getPrefix() +
+                    plugin.getConfigManager().getMessage("no-permission"));
+            return true;
+        }
+
+        if (args.length < 3) {
+            sender.sendMessage(plugin.getConfigManager().getPrefix() +
+                    "&cUsage: /wallet admin migrate <yaml|sqlite>");
+            return true;
+        }
+
+        String targetType = args[2].toLowerCase();
+        if (!targetType.equals("yaml") && !targetType.equals("sqlite")) {
+            sender.sendMessage(plugin.getConfigManager().getPrefix() +
+                    "&cInvalid storage type! Use 'yaml' or 'sqlite'");
+            return true;
+        }
+
+        // Trigger migration
+        boolean success = plugin.getWalletManager().migrateStorage(targetType);
+        if (success) {
+            String message = plugin.getConfigManager().getMessage("admin-migrate-success")
+                    .replace("{type}", targetType);
+            sender.sendMessage(plugin.getConfigManager().getPrefix() + message);
+        } else {
+            String message = plugin.getConfigManager().getMessage("admin-migrate-failed");
+            sender.sendMessage(plugin.getConfigManager().getPrefix() + message);
+        }
+        return true;
+    }
+
+    /**
+     * ENHANCED: Handle admin cleanup command
+     */
+    private boolean handleAdminCleanup(CommandSender sender) {
+        if (!sender.hasPermission("islandwallet.admin.cleanup")) {
+            sender.sendMessage(plugin.getConfigManager().getPrefix() +
+                    plugin.getConfigManager().getMessage("no-permission"));
+            return true;
+        }
+
+        // Trigger cleanup operation
+        plugin.getWalletManager().cleanupInvalidData();
+        String message = plugin.getConfigManager().getMessage("admin-cleanup-success");
+        sender.sendMessage(plugin.getConfigManager().getPrefix() + message);
+        return true;
+    }
+
+    /**
+     * ENHANCED: Handle admin test command
+     */
+    private boolean handleAdminTest(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("islandwallet.admin.test")) {
+            sender.sendMessage(plugin.getConfigManager().getPrefix() +
+                    plugin.getConfigManager().getMessage("no-permission"));
+            return true;
+        }
+
+        if (args.length < 3) {
+            sender.sendMessage(plugin.getConfigManager().getPrefix() +
+                    "&cUsage: /wallet admin test <database|economy|placeholders>");
+            return true;
+        }
+
+        String testType = args[2].toLowerCase();
+        switch (testType) {
+            case "database" -> {
+                boolean dbTest = plugin.getWalletManager().testDatabaseConnection();
+                String message = dbTest ? 
+                    plugin.getConfigManager().getMessage("admin-test-database-success") :
+                    plugin.getConfigManager().getMessage("admin-test-database-failed");
+                sender.sendMessage(plugin.getConfigManager().getPrefix() + message);
+            }
+            case "economy" -> {
+                boolean ecoTest = plugin.getEconomy() != null;
+                String message = ecoTest ? 
+                    plugin.getConfigManager().getMessage("admin-test-economy-success") :
+                    plugin.getConfigManager().getMessage("admin-test-economy-failed");
+                sender.sendMessage(plugin.getConfigManager().getPrefix() + message);
+            }
+            case "placeholders" -> {
+                boolean placeholderTest = plugin.getPlaceholderAPI() != null;
+                String message = placeholderTest ? 
+                    plugin.getConfigManager().getMessage("admin-test-placeholders-success") :
+                    plugin.getConfigManager().getMessage("admin-test-placeholders-failed");
+                sender.sendMessage(plugin.getConfigManager().getPrefix() + message);
+            }
+            default -> {
+                sender.sendMessage(plugin.getConfigManager().getPrefix() +
+                        "&cInvalid test type! Use: database, economy, or placeholders");
+            }
+        }
         return true;
     }
 
@@ -546,14 +723,105 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
 
         // Show point purchase cost in money
         double pointCost = plugin.getConfigManager().getPointCostMoney();
-        player.sendMessage(prefix + "&7Point Purchase Cost: &2$" + String.format("%.2f", pointCost) + " per point");
+        String costMessage = plugin.getConfigManager().getMessage("balance-point-cost")
+                .replace("{cost}", MessageUtil.formatMoney(pointCost))
+                .replace("{cost_formatted}", MessageUtil.formatMoney(pointCost));
+        player.sendMessage(prefix + costMessage);
 
         // Show player's money balance
         Economy economy = plugin.getEconomy();
         if (economy != null) {
             double balance = economy.getBalance(player);
-            player.sendMessage(prefix + "&7Your Money Balance: &2$" + String.format("%.2f", balance));
+            String balanceMessage = plugin.getConfigManager().getMessage("balance-money")
+                    .replace("{balance}", MessageUtil.formatMoney(balance))
+                    .replace("{balance_formatted}", MessageUtil.formatMoney(balance));
+            player.sendMessage(prefix + balanceMessage);
         }
+    }
+
+    /**
+     * ENHANCED: Send plugin information
+     */
+    private void sendPluginInfo(Player player) {
+        String prefix = plugin.getConfigManager().getPrefix();
+        
+        player.sendMessage(prefix + plugin.getConfigManager().getMessage("info-header"));
+        
+        // Plugin version
+        String versionMessage = plugin.getConfigManager().getMessage("info-version")
+                .replace("{version}", plugin.getDescription().getVersion());
+        player.sendMessage(prefix + versionMessage);
+        
+        // Current season
+        String seasonMessage = plugin.getConfigManager().getMessage("info-season")
+                .replace("{season}", String.valueOf(plugin.getDatabaseManager().getCurrentSeason()));
+        player.sendMessage(prefix + seasonMessage);
+        
+        // Total islands
+        String islandsMessage = plugin.getConfigManager().getMessage("info-total-islands")
+                .replace("{count}", String.valueOf(plugin.getLeaderboardManager().getTotalParticipatingIslands()));
+        player.sendMessage(prefix + islandsMessage);
+        
+        // Storage type
+        String storageMessage = plugin.getConfigManager().getMessage("info-storage")
+                .replace("{type}", plugin.getConfigManager().getStorageType().toUpperCase());
+        player.sendMessage(prefix + storageMessage);
+    }
+
+    /**
+     * ENHANCED: Send time information with multiple formats
+     */
+    private void sendTimeInfo(Player player) {
+        String prefix = plugin.getConfigManager().getPrefix();
+        long timeRemaining = plugin.getPayoutManager().getTimeUntilNextPayout();
+        
+        player.sendMessage(prefix + plugin.getConfigManager().getMessage("time-header"));
+        
+        // Multiple time formats
+        String compactMessage = plugin.getConfigManager().getMessage("time-compact")
+                .replace("{time}", MessageUtil.formatTimeRemainingCompact(timeRemaining));
+        player.sendMessage(prefix + compactMessage);
+        
+        String shortMessage = plugin.getConfigManager().getMessage("time-short")
+                .replace("{time}", MessageUtil.formatTimeRemainingShort(timeRemaining));
+        player.sendMessage(prefix + shortMessage);
+        
+        String dhmMessage = plugin.getConfigManager().getMessage("time-dhm")
+                .replace("{time}", MessageUtil.formatTimeRemainingDHM(timeRemaining));
+        player.sendMessage(prefix + dhmMessage);
+    }
+
+    /**
+     * ENHANCED: Send server statistics
+     */
+    private void sendServerStats(CommandSender sender) {
+        String prefix = plugin.getConfigManager().getPrefix();
+        
+        sender.sendMessage(prefix + plugin.getConfigManager().getMessage("stats-header"));
+        
+        // Total gems across all islands
+        long totalGems = plugin.getWalletManager().getAllIslandData().values().stream()
+                .mapToLong(IslandData::getGems)
+                .sum();
+        String gemsMessage = plugin.getConfigManager().getMessage("stats-total-gems")
+                .replace("{gems}", MessageUtil.formatNumber(totalGems));
+        sender.sendMessage(prefix + gemsMessage);
+        
+        // Total payout points
+        long totalPoints = plugin.getLeaderboardManager().getTotalPoints();
+        String pointsMessage = plugin.getConfigManager().getMessage("stats-total-points")
+                .replace("{points}", MessageUtil.formatNumber(totalPoints));
+        sender.sendMessage(prefix + pointsMessage);
+        
+        // Database type
+        String dbMessage = plugin.getConfigManager().getMessage("stats-database")
+                .replace("{type}", plugin.getConfigManager().getStorageType().toUpperCase());
+        sender.sendMessage(prefix + dbMessage);
+        
+        // Current season
+        String seasonMessage = plugin.getConfigManager().getMessage("stats-season")
+                .replace("{season}", String.valueOf(plugin.getDatabaseManager().getCurrentSeason()));
+        sender.sendMessage(prefix + seasonMessage);
     }
 
     /**
@@ -591,7 +859,7 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
         for (PayoutWinner winner : winners) {
             if (season <= 0 && winner.getSeason() != currentSeason) {
                 currentSeason = winner.getSeason();
-                sender.sendMessage(prefix + "&6--- Season " + currentSeason + " ---");
+                plugin.getLogger().info(player.getName() + " purchased " + points + " payout points for " + MessageUtil.formatMoney(cost));
             }
 
             String winnerInfo = String.format("&7#%d &e%s &7(Leader: %s) &b%s points",
@@ -615,6 +883,8 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(prefix + "&e/wallet balance &7- View island gem balance and rank");
         sender.sendMessage(prefix + "&e/wallet purchase &7- Open point purchase menu (uses money)");
         sender.sendMessage(prefix + "&e/wallet podium [season] &7- View winners podium");
+        sender.sendMessage(prefix + "&e/wallet info &7- View plugin information and statistics");
+        sender.sendMessage(prefix + "&e/wallet time &7- View countdown to next payout");
         sender.sendMessage(prefix + "&e/wallet get <player> &7- Check player's gems (admin)");
         sender.sendMessage(prefix + "&e/payout &7- View payout leaderboard");
 
@@ -626,6 +896,11 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(prefix + "&c/wallet admin withdraw <player> <amount> &7- Withdraw gems");
             sender.sendMessage(prefix + "&c/wallet admin view <island> &7- View island data");
             sender.sendMessage(prefix + "&c/wallet admin history [season] &7- View payout history");
+            sender.sendMessage(prefix + "&c/wallet admin stats &7- View server statistics");
+            sender.sendMessage(prefix + "&c/wallet admin backup &7- Create data backup");
+            sender.sendMessage(prefix + "&c/wallet admin migrate <type> &7- Migrate storage type");
+            sender.sendMessage(prefix + "&c/wallet admin cleanup &7- Clean invalid data");
+            sender.sendMessage(prefix + "&c/wallet admin test <type> &7- Test system components");
             sender.sendMessage(prefix + "&c/wallet admin reload &7- Reload plugin configuration");
         }
     }
@@ -643,6 +918,11 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(prefix + "&c/wallet admin withdraw <player> <amount> &7- Withdraw gems");
         sender.sendMessage(prefix + "&c/wallet admin view <island-id> &7- View island data");
         sender.sendMessage(prefix + "&c/wallet admin history [season] &7- View payout history");
+        sender.sendMessage(prefix + "&c/wallet admin stats &7- View server statistics");
+        sender.sendMessage(prefix + "&c/wallet admin backup &7- Create data backup");
+        sender.sendMessage(prefix + "&c/wallet admin migrate <yaml|sqlite> &7- Migrate storage");
+        sender.sendMessage(prefix + "&c/wallet admin cleanup &7- Clean invalid data");
+        sender.sendMessage(prefix + "&c/wallet admin test <type> &7- Test components");
         sender.sendMessage(prefix + "&c/wallet admin reload &7- Reload plugin configuration");
     }
 
@@ -688,15 +968,21 @@ public class IslandWalletCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             completions.addAll(Arrays.asList("balance", "purchase", "podium", "get", "help"));
 
+            completions.addAll(Arrays.asList("info", "time"));
+
             if (sender.hasPermission("islandwallet.admin.*")) {
                 completions.add("admin");
             }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("admin")) {
             if (sender.hasPermission("islandwallet.admin.*")) {
-                completions.addAll(Arrays.asList("reset", "force", "deposit", "withdraw", "view", "history", "reload"));
+                completions.addAll(Arrays.asList("reset", "force", "deposit", "withdraw", "view", "history", "stats", "backup", "migrate", "cleanup", "test", "reload"));
             }
         } else if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("force")) {
             completions.addAll(Arrays.asList("complete", "shutdown"));
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("migrate")) {
+            completions.addAll(Arrays.asList("yaml", "sqlite"));
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("test")) {
+            completions.addAll(Arrays.asList("database", "economy", "placeholders"));
         } else if (args.length == 3 && args[0].equalsIgnoreCase("get")) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 completions.add(player.getName());

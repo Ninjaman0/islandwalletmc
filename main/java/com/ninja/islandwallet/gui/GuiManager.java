@@ -275,7 +275,7 @@ public class GuiManager implements Listener {
                 List<String> lore = new ArrayList<>();
                 for (String loreLine : plugin.getConfigManager().getItemLore("purchase-access")) {
                     String processedLine = MessageUtil.replacePlaceholders(loreLine,
-                            "{point_cost_money}", String.format("%.2f", plugin.getConfigManager().getPointCostMoney()));
+                            "{point_cost_money}", MessageUtil.formatMoney(plugin.getConfigManager().getPointCostMoney()));
                     lore.add(processedLine);
                 }
                 meta.setLore(lore);
@@ -436,8 +436,12 @@ public class GuiManager implements Listener {
                 List<String> lore = new ArrayList<>();
                 for (String loreLine : plugin.getConfigManager().getItemLore(itemPath)) {
                     String processedLine = MessageUtil.replacePlaceholders(loreLine,
-                            "{cost}", String.format("%.2f", cost),
-                            "{player_balance}", String.format("%.2f", playerBalance),
+                            "{cost}", MessageUtil.formatMoney(cost),
+                            "{cost_formatted}", MessageUtil.formatMoney(cost),
+                            "{cost_compact}", MessageUtil.formatMoneyCompact(cost),
+                            "{player_balance}", MessageUtil.formatMoney(playerBalance),
+                            "{player_balance_formatted}", MessageUtil.formatMoney(playerBalance),
+                            "{player_balance_compact}", MessageUtil.formatMoneyCompact(playerBalance),
                             "{can_afford}", String.valueOf(playerBalance >= cost));
                     lore.add(processedLine);
                 }

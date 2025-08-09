@@ -119,30 +119,30 @@ items:
     material: EMERALD
     name: "&a&lBuy 1 Point"
     lore:
-      - "&7Cost: &2${cost}"
+      - "&7Cost: &2{cost_formatted}"
       - "&7Click to purchase 1 payout point"
       - ""
-      - "&aYour Balance: &2${player_balance}"
+      - "&aYour Balance: &2{player_balance_formatted}"
       - "&7Can Afford: {can_afford}"
 
   purchase-10-points:
     material: EMERALD_BLOCK
     name: "&a&lBuy 10 Points"
     lore:
-      - "&7Cost: &2${cost}"
+      - "&7Cost: &2{cost_formatted}"
       - "&7Click to purchase 10 payout points"
       - ""
-      - "&aYour Balance: &2${player_balance}"
+      - "&aYour Balance: &2{player_balance_formatted}"
       - "&7Can Afford: {can_afford}"
 
   purchase-100-points:
     material: BEACON
     name: "&a&lBuy 100 Points"
     lore:
-      - "&7Cost: &2${cost}"
+      - "&7Cost: &2{cost_formatted}"
       - "&7Click to purchase 100 payout points"
       - ""
-      - "&aYour Balance: &2${player_balance}"
+      - "&aYour Balance: &2{player_balance_formatted}"
       - "&7Can Afford: {can_afford}"
 
   # Access button for purchase GUI
@@ -153,7 +153,7 @@ items:
       - "&7Click to open point"
       - "&7purchase menu"
       - ""
-      - "&6Cost: &2${point_cost_money} per point"
+      - "&6Cost: &2{point_cost_money} per point"
 
   # Podium access button (NEW)
   podium-access:
@@ -240,14 +240,16 @@ messages:
   balance-display: "&a&lIsland Wallet Balance:"
   balance-gems: "&7Gems: &e{gems_formatted}"
   balance-payout-points: "&7Payout Points: &b{payout_points_formatted}"
+  balance-point-cost: "&7Point Purchase Cost: &2{cost_formatted} &7per point"
+  balance-money: "&7Your Money Balance: &2{balance_formatted}"
 
   gems-deposited: "&aDeposited &e{gems} &agems to island wallet!"
   gems-withdrawn: "&aWithdrew &e{gems} &agems from island wallet!"
   gems-transferred: "&7Your earned gems have been transferred to your island wallet."
 
   # Purchase messages (now using money) with full color support
-  purchase-success: "&aSuccessfully purchased &b{points} &apayout points for &2${cost}!"
-  purchase-insufficient-money: "&cYou don't have enough money! Required: &2${required} &cYou have: &2${current}"
+  purchase-success: "&aSuccessfully purchased &b{points} &apayout points for &2{cost_formatted}!"
+  purchase-insufficient-money: "&cYou don't have enough money! Required: &2{required_formatted} &cYou have: &2{current_formatted}"
   purchase-gui-opened: "&aOpened point purchase menu."
 
   # Leaderboard messages with full color support
@@ -264,6 +266,26 @@ messages:
   time-remaining-display: "&7Next payout in: &e{time_remaining_formatted}"
   time-remaining-hours: "&7Next payout in: &e{hours} hours"
   time-remaining-minutes: "&7Next payout in: &e{minutes} minutes"
+  
+  # ENHANCED: New info command messages
+  info-header: "&6&lPlugin Information:"
+  info-version: "&7Version: &e{version}"
+  info-season: "&7Current Season: &e{season}"
+  info-total-islands: "&7Total Islands: &e{count}"
+  info-storage: "&7Storage Type: &e{type}"
+  
+  # ENHANCED: New time command messages
+  time-header: "&6&lNext Payout Countdown:"
+  time-compact: "&7Compact: &e{time}"
+  time-short: "&7Short: &e{time}"
+  time-dhm: "&7Detailed: &e{time}"
+  
+  # ENHANCED: Statistics messages
+  stats-header: "&6&lServer Statistics:"
+  stats-total-gems: "&7Total Gems: &e{gems}"
+  stats-total-points: "&7Total Payout Points: &b{points}"
+  stats-database: "&7Database: &e{type}"
+  stats-season: "&7Current Season: &e{season}"
 
   # Admin messages with enhanced color coding
   admin-reset-success: "&aSuccessfully reset payout cycle!"
@@ -272,6 +294,16 @@ messages:
   admin-deposit-success: "&aDeposited &e{amount} &agems to &f{player}&a's island wallet!"
   admin-withdraw-success: "&aWithdrew &e{amount} &agems from &f{player}&a's island wallet!"
   admin-balance-check: "&f{player}&a's island has &e{gems_formatted} &agems."
+  admin-backup-success: "&aData backup created successfully!"
+  admin-migrate-success: "&aMigrated to &e{type} &astorage successfully!"
+  admin-migrate-failed: "&cMigration failed! Check console for details."
+  admin-cleanup-success: "&aData cleanup completed successfully!"
+  admin-test-database-success: "&aDatabase connection test: &2PASSED"
+  admin-test-database-failed: "&cDatabase connection test: &4FAILED"
+  admin-test-economy-success: "&aEconomy system test: &2PASSED"
+  admin-test-economy-failed: "&cEconomy system test: &4FAILED"
+  admin-test-placeholders-success: "&aPlaceholderAPI test: &2PASSED"
+  admin-test-placeholders-failed: "&cPlaceholderAPI test: &4FAILED"
   island-not-found: "&cIsland not found: &e{island}"
   player-not-found: "&cPlayer not found: &e{player}"
 
